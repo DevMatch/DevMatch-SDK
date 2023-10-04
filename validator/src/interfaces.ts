@@ -41,12 +41,13 @@ export class ProblemConfiguration {
 
 /**
  * Problems can accept user submisions in a variety of ways, including
- * pushing to a git repo, a url cotaining a website to test, a simple
- * text entry.
+ * pushing to a git repo, a url cotaining a website to test, or a code review
+ * submission that displays a diff viewer and a comment editor.
  */
 export enum ProblemInputType {
   GitRepo,
   Url,
+  CodeReview
 }
 
 export class ProblemOpenedMetadata {
