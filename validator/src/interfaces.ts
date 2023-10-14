@@ -19,11 +19,11 @@ export class ProblemTestCase {
   }
 }
 
-export class CodeReviewTestCase extends ProblemTestCase {
+export class CodeReviewComment extends ProblemTestCase {
   public newFileName: string
   public newFileCommentLine: number
 
-  public constructor(init?: Partial<CodeReviewTestCase>) {
+  public constructor(init?: Partial<CodeReviewComment>) {
     super(init)
     Object.assign(this, init)
   }
