@@ -43,7 +43,7 @@ export class Validator implements DevMatchValidator{
     }
 
     async getProblemStatement(userId: string): Promise<string> {
-        return Promise.resolve(`The contents of the problem are here!`)
+        return Promise.resolve(`The contents of the problem are here {repoUrl}!`)
     }
 
     /**
