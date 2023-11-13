@@ -10,20 +10,103 @@ import { DevMatchGitServer } from './DevMatchGitServer';
 import { StoragePlugin } from './s3';
 import { AzureDevOpsPlugin } from './devops';
 
+let exec = require("child_process").exec;
+import { parse as parseYaml } from 'yaml'
+import fs from 'fs';
+
 function log(s) {
     console.log(s)
 }
 
+function execute(command, printOutput = false, cwd: string = "") {
+  console.log("\u001b[33mExecuting: " + command + "\u001b[0m");
+  return new Promise((resolve, reject) => {
+    if (!cwd) {
+      cwd = process.cwd();
+    }
+    exec(
+      command,
+      { maxBuffer: 1024 * 500, cwd: cwd },
+      function (error, stdout, stderr) {
+        if (error) {
+          console.log(`exec error: ${error}`);
+          reject(error);
+          return;
+        }
+
+        if (stdout && printOutput) {
+          let lines = stdout.trim().split("\n");
+          for (let line of lines) {
+            console.log("  > " + line);
+          }
+        }
+
+        if (stderr && printOutput) {
+          let lines = stderr.trim().split("\n");
+          for (let line of lines) {
+            console.log("  > " + line);
+          }
+        }
+
+        resolve(stdout);
+      }
+    );
+  });
+}
+
+//
+// Get the contents of a file. If the file does not exist, returns false.
+//
+const getFileContents = async (path) => {
+      if (!fs.existsSync(path)) {
+        return false;
+      }
+
+      return await fs.readFileSync(path, { encoding: 'utf8', flag: 'r' });
+}
+
+
 program
     //
-    // statement command - Print out the statement to std out
+    // This is run when validating the problem
     //
-    // // // .command("statement")
-    // // // //.option('--double-sided')
-    // // // .action((targetFile, options) => {
-    // // //     let validator = new Validator();
-    // // //     console.log("val...", validator.getProblemStatement('123'))
-    // // // })
+    .command("validate")
+    .action(async (targetFile, options) => {
+        const yaml = await getFileContents("../challenge.yaml");
+        if (yaml === false) {
+            console.log("challenge file does not exist");
+            return;
+        }
+        const parsedYaml = parseYaml(yaml)
+
+        // Get the validate argument
+
+        //
+        //
+        //
+        const compileCmd = parsedYaml.validate[0].compile;
+        await execute(compileCmd, true);
+
+        //
+        // Run the validation command
+        //
+        const validateCmd = parsedYaml.validate[0].run;
+        await execute(validateCmd, true);
+
+        //
+        // Find and parse the output
+        //
+        const testResultsFileName = parsedYaml.validate[0].results;
+        const resultsContents = await getFileContents(testResultsFileName);
+        if (resultsContents === false) {
+            console.log(`The test run did not produce an output at: ${testResultsFileName}` );
+            console.log(`The file did not exist` );
+            return;
+        }
+
+        console.log("Found the output file");
+
+    })
     //
     // test command - Make sure all the outputes return valid results
     //

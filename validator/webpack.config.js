@@ -12,6 +12,7 @@ module.exports = {
   target: "node",
   entry: {
     main: "./src/validator.ts",
+    devmatch: "./src/index.ts",
   },
   output: {
     library: 'mylib',

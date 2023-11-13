@@ -1,0 +1,11 @@
+
+testcases:
+    - testcase: one
+
+# This will get run when validating.
+validate:
+    - compile: echo compiling
+      run: echo hello
+      results: output.xml
+
+
