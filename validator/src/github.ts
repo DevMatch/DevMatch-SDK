@@ -1,4 +1,6 @@
-
+/**
+ * Copyright (C) 2023 DevMatch Co. - All Rights Reserved
+ **/
 export class GitHubPlugin {
 
   public async inviteUserToRepo(githubUser: string, repoFullName: string) : Promise<any> {

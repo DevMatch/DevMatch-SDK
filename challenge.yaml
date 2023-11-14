@@ -1,0 +1,48 @@
+
+#
+# Test cases for this problem. Describe how many points each test gets
+#
+testcases:
+    - id: TEST_1
+      description: Add two integers
+      maxPoints: 10
+    - id: TEST_2
+      description: Bad arguments - Too few
+      maxPoints: 10
+    - id: TEST_3
+      description: Bad arguments - Too many
+      maxPoints: 80
+
+#
+# The statement that the user reads
+#
+statement: "Hello, this is a prboblem from YAML! Here is a git repo: {repoUrl}"
+
+#
+# Some configuration for this problem
+#
+configuration:
+    - ideEnabled: false
+    - inputType: GitRepo
+
+validate:
+      # The command to compile the users code
+    - compile: echo compiling
+      # The command to run the verification, this can be running tests
+      # And it needs to produce a file called with a junit test format
+      run: |
+        echo Running some testing command...
+        echo '<?xml version="1.0" encoding="UTF-8"?>
+        <!-- This is a basic JUnit-style XML example to highlight the basis structure.  -->
+        <testsuites time="15.682687">
+            <testsuite name="Tests.DevMatchTestCases" time="6.605871">
+                <testcase name="TEST_1" classname="Tests.simpleSum" time="2.111" />
+                <testcase name="TEST_2" classname="Tests.simpleSum" time="1.051" />
+                <testcase name="TEST_3" classname="Tests.simpleSum" time="3.441" />
+            </testsuite>
+        </testsuites>' > output.xml
+      # The location and filename of the results
+      results: output.xml
+
+
+

@@ -1,9 +1,9 @@
-//webpack.config.js
 const path = require('path');
 
 module.exports = {
-  // production   --> 
-  // development  -->
+  // possible values:
+  //   production
+  //   development
   mode: "production",
 
   // inline-source-map  -> Possible choice when publishing a single file
@@ -12,6 +12,7 @@ module.exports = {
   target: "node",
   entry: {
     main: "./src/validator.ts",
+    devmatch: "./src/index.ts",
   },
   output: {
     library: 'mylib',

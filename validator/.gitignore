@@ -3,3 +3,7 @@ dist
 !dist/main-bundle.js
 !dist/main-bundle.js.map
 .DS_Store
+output.xml
+output.json
+
+src/challenge.ts
