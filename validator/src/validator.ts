@@ -18,31 +18,27 @@ export class Validator implements DevMatchValidator{
     }
 
     async getTestCases(): Promise<ProblemTestCase[]> {
-        return Promise.resolve([
-            new ProblemTestCase({
-            id: "TEST_1",
-            description: "Add two integers",
-            maxPoints: 10,
-        }),
-        new ProblemTestCase({
-            id: "TEST_2",
-            description: "Bad arguments - Too few",
-            maxPoints: 10,
-        }),
-        new ProblemTestCase({
-            id: "TEST_3",
-            description: "Bad arguments - Too many",
-            maxPoints: 80,
-        }),
+        //
+        // Need to read this from the yaml
+        //
+        return Promise.resolve([ 
+            new ProblemTestCase({ id: "TEST_1", description: "Add two integers", maxPoints: 10, }),
+            new ProblemTestCase({ id: "TEST_2", description: "Bad arguments - Too few", maxPoints: 10, }),
+            new ProblemTestCase({ id: "TEST_3", description: "Bad arguments - Too many", maxPoints: 80, }),
         ])
     }
 
     async prerequesites(user: User) : Promise<ProblemPrerequisitesResult> {
+        //
         // There are no pre-requisites for this problem.
+        //
         return Promise.resolve(new ProblemPrerequisitesResult(true));
     }
 
     async getProblemStatement(userId: string): Promise<string> {
+        //
+        //
+        //
         return Promise.resolve(`The contents of the problem are here {repoUrl}!`)
     }
 

@@ -1,15 +1,17 @@
 
 #
-# If you want to have specific points for specific tests, add the test cases here.
-# Otherwise, each test case will have equal points.
+# Test cases for this problem. Describe how many points each test gets
 #
-#   new ProblemTestCase({
-#      id: "TEST_1",
-#      description: "Add two integers",
-#      maxPoints: 10,
-#   })
 testcases:
-    - testcase: one
+    - id: TEST_1
+      description: Add two integers
+      maxPoints: 10
+    - id: TEST_2
+      description: Bad arguments - Too few
+      maxPoints: 10
+    - id: TEST_3
+      description: Bad arguments - Too many
+      maxPoints: 80
 
 validate:
     - compile: echo compiling
@@ -19,9 +21,9 @@ validate:
         <!-- This is a basic JUnit-style XML example to highlight the basis structure.  -->
         <testsuites time="15.682687">
             <testsuite name="Tests.DevMatchTestCases" time="6.605871">
-                <testcase name="testCase1" classname="Tests.Registration" time="2.113871" />
-                <testcase name="testCase2" classname="Tests.Registration" time="1.051" />
-                <testcase name="testCase3" classname="Tests.Registration" time="3.441" />
+                <testcase name="TEST_1" classname="Tests.simpleSum" time="2.111" />
+                <testcase name="TEST_2" classname="Tests.simpleSum" time="1.051" />
+                <testcase name="TEST_3" classname="Tests.simpleSum" time="3.441" />
             </testsuite>
         </testsuites>' > output.xml
       results: output.xml

@@ -137,7 +137,6 @@ program
         // Write the DevMatch judge output
         //
         fs.writeFileSync("output.json", JSON.stringify(evaluatedTestCases));
-
     })
     //
     // test command - Make sure all the outputes return valid results
@@ -181,7 +180,7 @@ program
         if (total != 100) {
             validationFailures.push("Total points of test cases do not add up to 100")
         }
- 
+
         // Validation rule: Test cases must have unique IDs
         let testCaseIds = problemTestCases.map((t) => t.id)
         for (const testCaseId of testCaseIds) {
@@ -209,7 +208,7 @@ program
         // turn these test cases into evaluated test cases
         const evaluatedTestCases: EvaluatedTestCase[] = testCases?.map(
             (testCase) => new EvaluatedTestCase(testCase)
-        ); 
+        );
 
         let totalPoints = 0;
         let passed = true;
@@ -219,13 +218,13 @@ program
               `Evaluating case ${testCase.id} - ${testCase.actualPoints} / ${testCase.maxPoints}`
             );
             totalPoints += testCase.actualPoints;
-      
+
             // If any test case fails, then we fail the whole thing
             if (!testCase.solved) {
               passed = false;
             }
           }
-      
+
           const verdict = {
             totalPoints: totalPoints,
             passed: passed,
