@@ -1,4 +1,6 @@
-
+/**
+ * Copyright (C) 2023 DevMatch Co. - All Rights Reserved
+ **/
 let exec = require("child_process").exec;
 
 export function execute(command, printOutput = false, cwd: string = "") {

@@ -1,4 +1,6 @@
-
+/**
+ * Copyright (C) 2023 DevMatch Co. - All Rights Reserved
+ **/
 const YAML = require('yaml');
 const fs = require('fs');
 
