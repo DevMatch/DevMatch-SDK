@@ -2,10 +2,12 @@ import { DevMatchValidator, EvaluatedTestCase, ProblemConfiguration, ProblemInpu
 
 import { GitHubPlugin } from './github'
 import { LoggerPlugin } from './logger'
-import { UnzipPlugin } from './unzip' 
+import { UnzipPlugin } from './unzip'
 import { DevMatchGitServer } from './DevMatchGitServer'
 import { StoragePlugin } from './s3'
 import { AzureDevOpsPlugin } from "./devops";
+
+import { CHALLENGE_YAML_STRING } from './challenge'
 
 export class Validator implements DevMatchValidator{
     constructor(
@@ -18,14 +20,17 @@ export class Validator implements DevMatchValidator{
     }
 
     async getTestCases(): Promise<ProblemTestCase[]> {
-        //
-        // Need to read this from the yaml
-        //
-        return Promise.resolve([ 
-            new ProblemTestCase({ id: "TEST_1", description: "Add two integers", maxPoints: 10, }),
-            new ProblemTestCase({ id: "TEST_2", description: "Bad arguments - Too few", maxPoints: 10, }),
-            new ProblemTestCase({ id: "TEST_3", description: "Bad arguments - Too many", maxPoints: 80, }),
-        ])
+        const yaml = CHALLENGE_YAML_STRING 
+        let testCases : ProblemTestCase[] = []
+        for (const testCase of testCases) {
+            testCases.push(new ProblemTestCase({
+                id: testCase.id,
+                description: testCase.description,
+                maxPoints: testCase.maxPoints
+            }))
+        }
+
+        return Promise.resolve(testCases)
     }
 
     async prerequesites(user: User) : Promise<ProblemPrerequisitesResult> {
@@ -36,10 +41,8 @@ export class Validator implements DevMatchValidator{
     }
 
     async getProblemStatement(userId: string): Promise<string> {
-        //
-        //
-        //
-        return Promise.resolve(`The contents of the problem are here {repoUrl}!`)
+        const yaml = CHALLENGE_YAML_STRING 
+        return Promise.resolve(yaml.statement)
     }
 
     /**

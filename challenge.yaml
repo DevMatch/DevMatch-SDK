@@ -13,6 +13,18 @@ testcases:
       description: Bad arguments - Too many
       maxPoints: 80
 
+#
+# The statement that the user reads
+#
+statement: "Hello, this is a prboblem from YAML! Here is a git repo: {repoUrl}"
+
+#
+# Some configuration for this problem
+#
+configuration:
+    - ideEnabled: false
+    - inputType: GitRepo
+
 validate:
       # The command to compile the users code
     - compile: echo compiling

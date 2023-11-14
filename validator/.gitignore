@@ -5,3 +5,5 @@ dist
 .DS_Store
 output.xml
 output.json
+
+src/challenge.ts

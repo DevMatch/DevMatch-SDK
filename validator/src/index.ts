@@ -14,7 +14,7 @@ import { DevMatchGitServer } from './DevMatchGitServer';
 import { StoragePlugin } from './s3';
 import { AzureDevOpsPlugin } from './devops';
 
-import { parse as parseJunitXml, TestSuites } from 'junit2json' // ESM
+import { parse as parseJunitXml, TestSuites } from 'junit2json'
 
 let exec = require("child_process").exec;
 import { parse as parseYaml } from 'yaml'
