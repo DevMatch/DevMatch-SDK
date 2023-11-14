@@ -1,11 +1,30 @@
 
+#
+# If you want to have specific points for specific tests, add the test cases here.
+# Otherwise, each test case will have equal points.
+#
+#   new ProblemTestCase({
+#      id: "TEST_1",
+#      description: "Add two integers",
+#      maxPoints: 10,
+#   })
 testcases:
     - testcase: one
 
-# This will get run when validating.
 validate:
     - compile: echo compiling
-      run: echo hello
+      run: |
+        echo Running some testing command...
+        echo '<?xml version="1.0" encoding="UTF-8"?>
+        <!-- This is a basic JUnit-style XML example to highlight the basis structure.  -->
+        <testsuites time="15.682687">
+            <testsuite name="Tests.DevMatchTestCases" time="6.605871">
+                <testcase name="testCase1" classname="Tests.Registration" time="2.113871" />
+                <testcase name="testCase2" classname="Tests.Registration" time="1.051" />
+                <testcase name="testCase3" classname="Tests.Registration" time="3.441" />
+            </testsuite>
+        </testsuites>' > output.xml
       results: output.xml
+
 
 

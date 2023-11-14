@@ -1,4 +1,8 @@
-// const { program } = require('commander');
+/**
+ *
+ * 2023 DevMatch Co.
+ *
+ **/
 import { Command } from '@commander-js/extra-typings';
 import { program } from '@commander-js/extra-typings';
 import { EvaluatedTestCase, User } from './interfaces';
@@ -9,6 +13,8 @@ import { LoggerPlugin } from './logger';
 import { DevMatchGitServer } from './DevMatchGitServer';
 import { StoragePlugin } from './s3';
 import { AzureDevOpsPlugin } from './devops';
+
+import { parse as parseJunitXml, TestSuites } from 'junit2json' // ESM
 
 let exec = require("child_process").exec;
 import { parse as parseYaml } from 'yaml'
@@ -65,7 +71,6 @@ const getFileContents = async (path) => {
       return await fs.readFileSync(path, { encoding: 'utf8', flag: 'r' });
 }
 
-
 program
     //
     // This is run when validating the problem
@@ -79,10 +84,8 @@ program
         }
         const parsedYaml = parseYaml(yaml)
 
+        //
         // Get the validate argument
-
-        //
-        //
         //
         const compileCmd = parsedYaml.validate[0].compile;
         await execute(compileCmd, true);
@@ -105,6 +108,35 @@ program
         }
 
         console.log("Found the output file");
+
+        // Prase the JUnit test result file
+        const output = await parseJunitXml(resultsContents)
+        if (!output) {
+            console.log(`Unable to parse output: ${testResultsFileName}`);
+            return;
+        }
+
+        const jUnitTestSuites = (output as TestSuites).testsuite;
+
+        if (!(jUnitTestSuites && jUnitTestSuites[0] && jUnitTestSuites[0].testcase)) {
+            console.log("Unable to find testcases")
+            return;
+        }
+
+        let evaluatedTestCases : EvaluatedTestCase[] = []
+        const numberOfTestCases = jUnitTestSuites[0]?.testcase.length;
+        for (const testCase of jUnitTestSuites[0]?.testcase) {
+            let evaluatedTestCase : EvaluatedTestCase = new Object() as EvaluatedTestCase;
+            evaluatedTestCase.actualPoints = 100 / numberOfTestCases;
+            evaluatedTestCase.hint = 'here is a hint from the problem for case '
+            evaluatedTestCase.solved = true
+            evaluatedTestCases.push(evaluatedTestCase);
+        }
+
+        //
+        // Write the DevMatch judge output
+        //
+        fs.writeFileSync("output.json", JSON.stringify(evaluatedTestCases));
 
     })
     //
