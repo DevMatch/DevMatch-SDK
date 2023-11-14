@@ -130,7 +130,7 @@ program
             evaluatedTestCase.actualPoints = 100 / numberOfTestCases;
             evaluatedTestCase.hint = 'here is a hint from the problem for case '
             evaluatedTestCase.solved = true
-            evaluatedTestCase.id = testCase.id;
+            evaluatedTestCase.id = testCase.name || "Invalid name";
             evaluatedTestCases.push(evaluatedTestCase);
         }
 
