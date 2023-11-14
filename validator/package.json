@@ -4,11 +4,10 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "compile": "tsc",
     "publish": "webpack --progress  ",
+    "prepublish": "node yaml2js.js ../challenge.yaml src/challenge.ts",
     "devmatch": "node dist/devmatch-bundle.js ",
-    "devmatch-validate": "node dist/devmatch-bundle.js validate",
-    "prepublish": "node yaml2js.js ../challenge.yaml src/challenge.ts"
+    "predevmatch": "npm run publish"
   },
   "keywords": [],
   "author": "",
