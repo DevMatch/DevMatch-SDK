@@ -1,3 +1,6 @@
+/**
+ * Copyright (C) 2023 DevMatch Co. - All Rights Reserved
+ **/
 export class User {
   id: string
   name: string
@@ -39,7 +42,6 @@ export class EvaluatedTestCase extends ProblemTestCase {
     super(testCase)
   }
 }
-
 
 /**
  * Different configurations for this problem, the defaults are defined here.

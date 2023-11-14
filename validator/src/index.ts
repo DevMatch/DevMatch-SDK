@@ -17,17 +17,10 @@ import { parse as parseJunitXml, TestSuites } from "junit2json";
 import fs from "fs";
 import { parse as parseYaml } from "yaml";
 
-//
-// Get the contents of a file. If the file does not exist, returns false.
-//
-const getFileContents = async (path) => {
-  if (!fs.existsSync(path)) {
-    return false;
-  }
 
-  return fs.readFileSync(path, { encoding: "utf8", flag: "r" });
-};
-
+/**
+ * The DevMatch CLI TOOL
+ */
 program
   //
   // This is run when validating the problem
@@ -228,3 +221,14 @@ program
   });
 
 program.parse();
+
+//
+// Get the contents of a file. If the file does not exist, returns false.
+//
+const getFileContents = async (path) => {
+  if (!fs.existsSync(path)) {
+    return false;
+  }
+
+  return fs.readFileSync(path, { encoding: "utf8", flag: "r" });
+};
