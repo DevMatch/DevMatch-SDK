@@ -123,11 +123,17 @@ program
             return;
         }
 
+
+        // Read the test cases from the YAML file, and start the comparison with the
+        // evaluated test cases.
+
+
         let evaluatedTestCases : EvaluatedTestCase[] = []
         const numberOfTestCases = jUnitTestSuites[0]?.testcase.length;
         for (const testCase of jUnitTestSuites[0]?.testcase) {
             let evaluatedTestCase : EvaluatedTestCase = new Object() as EvaluatedTestCase;
             evaluatedTestCase.actualPoints = 100 / numberOfTestCases;
+            evaluatedTestCase.maxPoints = 100 / numberOfTestCases;
             evaluatedTestCase.hint = 'here is a hint from the problem for case '
             evaluatedTestCase.solved = true
             evaluatedTestCase.id = testCase.name || "Invalid name";
@@ -138,6 +144,7 @@ program
         // Write the DevMatch judge output
         //
         fs.writeFileSync("output.json", JSON.stringify(evaluatedTestCases));
+        console.table(evaluatedTestCases);
     })
     //
     // test command - Make sure all the outputes return valid results

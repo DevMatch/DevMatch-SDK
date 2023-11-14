@@ -14,7 +14,10 @@ testcases:
       maxPoints: 80
 
 validate:
+      # The command to compile the users code
     - compile: echo compiling
+      # The command to run the verification, this can be running tests
+      # And it needs to produce a file called with a junit test format
       run: |
         echo Running some testing command...
         echo '<?xml version="1.0" encoding="UTF-8"?>
@@ -26,6 +29,7 @@ validate:
                 <testcase name="TEST_3" classname="Tests.simpleSum" time="3.441" />
             </testsuite>
         </testsuites>' > output.xml
+      # The location and filename of the results
       results: output.xml
 
 
