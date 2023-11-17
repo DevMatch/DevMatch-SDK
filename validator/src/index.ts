@@ -15,6 +15,8 @@ import { program } from "@commander-js/extra-typings";
 import { parse as parseJunitXml, TestSuites } from "junit2json";
 
 import fs from "fs";
+import path from "path";
+
 import { parse as parseYaml } from "yaml";
 
 const getFileContents = async (path) => {
@@ -58,22 +60,46 @@ program
       [ "inputType", problemConfiguration.inputType ]
     ])
 
-    //
-    // Get the validate argument
-    //
-    const compileCmd = parsedYaml.validate[0].compile;
-    await execute(compileCmd, true);
+    const worskpaceFolder = path.join(process.cwd(), "..", "workspace");
+    console.log("Current working directory", worskpaceFolder)
 
-    //
-    // Run the validation command
-    //
-    const validateCmd = parsedYaml.validate[0].run;
-    await execute(validateCmd, true);
+    console.log(`                                     `)
+    console.log(`   _____ _______       _____ _______ `)
+    console.log(`  / ____|__   __|/\\   |  __ \\__   __|`)
+    console.log(` | (___    | |  /  \\  | |__) | | |   `)
+    console.log(`  \\___ \\   | | / /\\ \\ |  _  /  | |   `)
+    console.log(`  ____) |  | |/ ____ \\| | \\ \\  | |   `)
+    console.log(` |_____/   |_/_/    \\_\\_|  \\_\\ |_|   `)
+    console.log(`                                     `)
+    console.log(`                                     `)
+    try {
+        //
+        // Get the validate argument
+        //
+        const compileCmd = parsedYaml.validate[0].compile;
+        await execute(compileCmd, true, worskpaceFolder);
+
+        //
+        // Run the validation command
+        //
+        const validateCmd = parsedYaml.validate[0].run;
+        await execute(validateCmd, true, worskpaceFolder);
+    } catch (e) {
+        console.log("Caught exception while executing.");
+    }
+
+    console.log(`    ______ _   _ _____  `)
+    console.log(`   |  ____| \\ | |  __ \\ `)
+    console.log(`   | |__  |  \\| | |  | |`)
+    console.log(`   |  __| | . \\\` | |  | |`)
+    console.log(`   | |____| |\\  | |__| |`)
+    console.log(`   |______|_| \\_|_____/ `)
+    console.log(`                        `)
 
     //
     // Find and parse the output
     //
-    const testResultsFileName = parsedYaml.validate[0].results;
+    const testResultsFileName = path.join(process.cwd(), "..", "workspace", parsedYaml.validate[0].results);
     const resultsContents = await getFileContents(testResultsFileName);
     if (resultsContents === false) {
       console.log(
@@ -83,38 +109,87 @@ program
       return;
     }
 
-    console.log("Found the output file");
 
-    // Prase the JUnit test result file
-    const output = await parseJunitXml(resultsContents);
-    if (!output) {
+    //
+    // Now we reconcile the test cases defined in the yaml file, and the
+    // test results from the junit output.
+    //
+    // In general, we will prefix "yaml" to variables that deal with the
+    // test cases as read from yaml configuraiton.
+    //
+    // We will prefix with "build" to variables that deal with the output
+    // out the build.
+    //
+
+    //
+    // Read build test cases: Parse the JUnit test result file
+    //
+    console.log(`Found the output file: ${testResultsFileName}`);
+    const buildParsedJunitContents = await parseJunitXml(resultsContents);
+    if (!buildParsedJunitContents) {
       console.log(`Unable to parse output: ${testResultsFileName}`);
       return;
     }
 
-    const jUnitTestSuites = (output as TestSuites).testsuite;
+    const buildTestSuites = (buildParsedJunitContents as TestSuites).testsuite;
 
-    if (
-      !(jUnitTestSuites && jUnitTestSuites[0] && jUnitTestSuites[0].testcase)
-    ) {
+    // There must be at least one test suite and test case
+    // TODO: IS this really needed?
+    if (!(buildTestSuites && buildTestSuites[0] && buildTestSuites[0].testcase)) {
       console.log("Unable to find testcases");
       return;
+    }
+
+    // Flatten the tree and just extract all the test cases from the build
+    let buildTestCases : any [] = [];
+    for (const suites of buildTestSuites) {
+        if (suites?.testcase === undefined) {
+            continue;
+        }
+        for (const testCase of suites?.testcase) {
+            buildTestCases.push(testCase);
+            console.log(`Found test case from the build : ${testCase.name}`)
+        }
     }
 
     // Read the test cases from the YAML file, and start the comparison with the
     // evaluated test cases.
 
+    //
+    // Read Yaml test cases: Parse the yaml file
+    //
     let evaluatedTestCases: EvaluatedTestCase[] = [];
-    const numberOfTestCases = jUnitTestSuites[0]?.testcase.length;
-    for (const testCase of jUnitTestSuites[0]?.testcase) {
+    for (const yamlTestCase of parsedYaml.testcases) {
+
+      // Initialize Yaml test cases to failed state
       let evaluatedTestCase: EvaluatedTestCase =
         new Object() as EvaluatedTestCase;
-      evaluatedTestCase.actualPoints = 100 / numberOfTestCases;
-      evaluatedTestCase.maxPoints = 100 / numberOfTestCases;
-      evaluatedTestCase.hint = "here is a hint from the problem for case ";
-      evaluatedTestCase.solved = true;
-      evaluatedTestCase.id = testCase.name || "Invalid name";
+      evaluatedTestCase.actualPoints = 0;
+      evaluatedTestCase.maxPoints = yamlTestCase.maxPoints;
+      //evaluatedTestCase.hint = "here is a hint from the problem for case ";
+      evaluatedTestCase.solved = false;
+      evaluatedTestCase.id = yamlTestCase.id || "Invalid name";
       evaluatedTestCases.push(evaluatedTestCase);
+    }
+
+    //
+    // Test case mapping, start from the yamlTest cases
+    //
+    for (let yamlTestCase of evaluatedTestCases) {
+      // Find this result on build test cases
+      const foundBuildTestCase = buildTestCases.find((c) => c.name === yamlTestCase.id);
+        if (foundBuildTestCase) {
+          const failure = foundBuildTestCase.failure !== undefined;
+          console.log(`Found mapping ${yamlTestCase.id}. Failure = ${failure}`);
+
+          if (!failure) {
+              yamlTestCase.actualPoints = yamlTestCase.maxPoints;
+              yamlTestCase.solved = true;
+          }
+
+        } else {
+            console.log(`Test case mapping ${yamlTestCase.id} NOT found. Build did not produce this test case.`);
+        }
     }
 
     //
