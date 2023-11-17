@@ -49,6 +49,8 @@ export class EvaluatedTestCase extends ProblemTestCase {
 export class ProblemConfiguration {
   inputType: ProblemInputType = ProblemInputType.GitRepo
   ideEnabled: boolean = false
+  desktopEnabled = false;
+  vsliteEnabled = false;
 }
 
 /**
