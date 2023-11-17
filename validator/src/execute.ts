@@ -22,14 +22,14 @@ export function execute(command, printOutput = false, cwd: string = "") {
         if (stdout && printOutput) {
           let lines = stdout.trim().split("\n");
           for (let line of lines) {
-            console.log("  > " + line);
+            console.log("\u001b[33m  > " + line + "\u001b[0m");
           }
         }
 
         if (stderr && printOutput) {
           let lines = stderr.trim().split("\n");
           for (let line of lines) {
-            console.log("  > " + line);
+            console.log("\u001b[31m  > " + line + "\u001b[0m");
           }
         }
 

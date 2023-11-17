@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "publish": "webpack --progress  ",
+    "publish": "webpack   ",
     "prepublish": "node yaml2js.js ../challenge.yaml src/challenge.ts",
     "devmatch": "node dist/devmatch-bundle.js ",
     "predevmatch": "npm run publish"
