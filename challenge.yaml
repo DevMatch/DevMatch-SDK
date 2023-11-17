@@ -1,3 +1,4 @@
+version: 1.0
 
 #
 # Test cases for this problem. Describe how many points each test gets
@@ -16,21 +17,39 @@ testcases:
 #
 # The statement that the user reads
 #
-statement: "Hello, this is a prboblem from YAML! Here is a git repo: {repoUrl}"
+statement: |
+  Hello, this is the problem statement!
+
+  Here is a git repository with the starter code:
+
+  ```
+  {repoUrl}
+  ```
 
 #
 # Some configuration for this problem
 #
 configuration:
-    - ideEnabled: false
     - inputType: GitRepo
+    - ideEnabled: false
+    - vsliteEnabled: false
+    - desktopEnabled: false
 
+#
+# Validation will run these steps in sequence. Include environment setup,
+# installation of dependencies and running tests. If the step you are running
+# will produce a test output file, include the `results` property which should
+# contain the name of the file.
+#
 validate:
-      # The command to compile the users code
-    - compile: echo compiling
-      # The command to run the verification, this can be running tests
-      # And it needs to produce a file called with a junit test format
-      run: |
+    # Here is a task that compiles the code
+    - name: "Compile the code"
+      cmd: echo Compiling...
+
+    # The command to run the verification, this can be running tests
+    # And it needs to produce a file called with a junit test format
+    - name: "Run the tests"
+      cmd: |
         echo Running some testing command...
         echo '<?xml version="1.0" encoding="UTF-8"?>
         <!-- This is a basic JUnit-style XML example to highlight the basis structure.  -->

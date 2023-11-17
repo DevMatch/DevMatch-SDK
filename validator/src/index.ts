@@ -44,7 +44,7 @@ program
     const parsedYaml = parseYaml(yaml);
 
     //
-    // Print the problem configuration for debuggin purposes
+    // Print the problem configuration for debugging purposes
     //
     let problemCode = new Validator(
       new GitHubPlugin(),
@@ -63,6 +63,9 @@ program
     const worskpaceFolder = path.join(process.cwd(), "..", "workspace");
     console.log("Current working directory", worskpaceFolder)
 
+    const validationSteps = parsedYaml.validate;
+    let buildTestResultFileNames : string[] = [];
+
     console.log(`                                     `)
     console.log(`   _____ _______       _____ _______ `)
     console.log(`  / ____|__   __|/\\   |  __ \\__   __|`)
@@ -73,41 +76,45 @@ program
     console.log(`                                     `)
     console.log(`                                     `)
     try {
-        //
-        // Get the validate argument
-        //
-        const compileCmd = parsedYaml.validate[0].compile;
-        await execute(compileCmd, true, worskpaceFolder);
+        for (const validationStep of validationSteps)
+        {
+            const workingDirectory = path.join(worskpaceFolder, validationStep.workingDirectory ?? '');
+            console.log(`name            : ${validationStep.name}`);
+            console.log(`workingDirectory: ${workingDirectory}`);
+            console.log(`cmd             : ${validationStep.cmd}`);
 
-        //
-        // Run the validation command
-        //
-        const validateCmd = parsedYaml.validate[0].run;
-        await execute(validateCmd, true, worskpaceFolder);
+            //
+            // Run the command
+            //
+            try {
+
+                await execute(validationStep.cmd, true, workingDirectory);
+            } catch (innerError) {
+                console.error("Command failed. But continuing still...");
+            }
+
+            //
+            // Collect the result if instructed
+            //
+            if (validationStep.results !== undefined)
+            {
+                const resultPath = path.join(workingDirectory, validationStep.results);
+                buildTestResultFileNames.push(resultPath)
+            }
+
+        }
     } catch (e) {
-        console.log("Caught exception while executing.");
+        console.error("Caught exception while executing.");
+        console.error(e)
     }
 
-    console.log(`    ______ _   _ _____  `)
-    console.log(`   |  ____| \\ | |  __ \\ `)
-    console.log(`   | |__  |  \\| | |  | |`)
-    console.log(`   |  __| | . \\\` | |  | |`)
-    console.log(`   | |____| |\\  | |__| |`)
-    console.log(`   |______|_| \\_|_____/ `)
-    console.log(`                        `)
-
-    //
-    // Find and parse the output
-    //
-    const testResultsFileName = path.join(process.cwd(), "..", "workspace", parsedYaml.validate[0].results);
-    const resultsContents = await getFileContents(testResultsFileName);
-    if (resultsContents === false) {
-      console.log(
-        `The test run did not produce an output at: ${testResultsFileName}`
-      );
-      console.log(`The file did not exist`);
-      return;
-    }
+    console.log(`  ______ _   _ _____  `)
+    console.log(` |  ____| \\ | |  __ \\ `)
+    console.log(` | |__  |  \\| | |  | |`)
+    console.log(` |  __| | . \\\` | |  | |`)
+    console.log(` | |____| |\\  | |__| |`)
+    console.log(` |______|_| \\_|_____/ `)
+    console.log(`                      `)
 
 
     //
@@ -121,35 +128,59 @@ program
     // out the build.
     //
 
-    //
-    // Read build test cases: Parse the JUnit test result file
-    //
-    console.log(`Found the output file: ${testResultsFileName}`);
-    const buildParsedJunitContents = await parseJunitXml(resultsContents);
-    if (!buildParsedJunitContents) {
-      console.log(`Unable to parse output: ${testResultsFileName}`);
-      return;
+    const extractTestCasesFromJunit = async (fileName) => {
+        const resultsContents = await getFileContents(fileName);
+        if (resultsContents === false) {
+          console.log(
+            `The test run did not produce an output at: ${fileName}`
+          );
+          return [];
+        }
+
+        //
+        // Read build test cases: Parse the JUnit test result file
+        //
+        console.log(`Found the output file: ${fileName}`);
+        const buildParsedJunitContents = await parseJunitXml(resultsContents);
+        if (!buildParsedJunitContents) {
+          console.log(`Unable to parse output: ${fileName}`);
+          return;
+        }
+
+        const buildTestSuites = (buildParsedJunitContents as TestSuites).testsuite;
+
+        // There must be at least one test suite and test case
+        // TODO: IS this really needed?
+        if (!(buildTestSuites && buildTestSuites[0] && buildTestSuites[0].testcase)) {
+          console.log("Unable to find testcases");
+          return;
+        }
+
+        // Flatten the tree and just extract all the test cases from the build
+        let buildTestCases : any [] = [];
+        for (const suites of buildTestSuites) {
+            if (suites?.testcase === undefined) {
+                continue;
+            }
+            for (const testCase of suites?.testcase) {
+                buildTestCases.push(testCase);
+                console.log(`Found test case from the build : '${testCase.name}'`)
+            }
+        }
+
+        return buildTestCases;
     }
 
-    const buildTestSuites = (buildParsedJunitContents as TestSuites).testsuite;
+    console.log(``);
 
-    // There must be at least one test suite and test case
-    // TODO: IS this really needed?
-    if (!(buildTestSuites && buildTestSuites[0] && buildTestSuites[0].testcase)) {
-      console.log("Unable to find testcases");
-      return;
-    }
 
-    // Flatten the tree and just extract all the test cases from the build
+    // NOW we need to merge the result files... and
+    // just get the various test cases from as many
+    // test files we have in buildTestResultFileNames
     let buildTestCases : any [] = [];
-    for (const suites of buildTestSuites) {
-        if (suites?.testcase === undefined) {
-            continue;
-        }
-        for (const testCase of suites?.testcase) {
-            buildTestCases.push(testCase);
-            console.log(`Found test case from the build : ${testCase.name}`)
-        }
+    for (const resultFile of buildTestResultFileNames) {
+        console.log(`Result file : ${resultFile}`);
+        buildTestCases = buildTestCases.concat(await extractTestCasesFromJunit(resultFile));
     }
 
     // Read the test cases from the YAML file, and start the comparison with the
@@ -164,20 +195,24 @@ program
       // Initialize Yaml test cases to failed state
       let evaluatedTestCase: EvaluatedTestCase =
         new Object() as EvaluatedTestCase;
+
       evaluatedTestCase.actualPoints = 0;
       evaluatedTestCase.maxPoints = yamlTestCase.maxPoints;
-      //evaluatedTestCase.hint = "here is a hint from the problem for case ";
       evaluatedTestCase.solved = false;
       evaluatedTestCase.id = yamlTestCase.id || "Invalid name";
+      //evaluatedTestCase.hint = "here is a hint from the problem for case ";
+
       evaluatedTestCases.push(evaluatedTestCase);
     }
+
+    console.log(``);
 
     //
     // Test case mapping, start from the yamlTest cases
     //
     for (let yamlTestCase of evaluatedTestCases) {
       // Find this result on build test cases
-      const foundBuildTestCase = buildTestCases.find((c) => c.name === yamlTestCase.id);
+      const foundBuildTestCase = buildTestCases.find((c) => c.name.trim() === yamlTestCase.id);
         if (foundBuildTestCase) {
           const failure = foundBuildTestCase.failure !== undefined;
           console.log(`Found mapping ${yamlTestCase.id}. Failure = ${failure}`);
@@ -188,7 +223,7 @@ program
           }
 
         } else {
-            console.log(`Test case mapping ${yamlTestCase.id} NOT found. Build did not produce this test case.`);
+            console.log(`Test case mapping ${yamlTestCase.id} *NOT* found. Build did not produce this test case.`);
         }
     }
 
