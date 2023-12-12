@@ -2,6 +2,7 @@
  * Copyright (C) 2023 DevMatch Co. - All Rights Reserved
  **/
 import {
+  CodeReviewComment,
   DevMatchValidator,
   EvaluatedTestCase,
   ProblemConfiguration,
@@ -45,28 +46,44 @@ export class Validator implements DevMatchValidator {
    * @returns A promise with the test cases from this problem.
    */
   async getTestCases(): Promise<ProblemTestCase[]> {
+    const config = await this.getProblemConfiguration();
+
     const yaml = CHALLENGE_YAML_STRING;
     let testCases: ProblemTestCase[] = [];
-    for (const testCase of testCases) {
-      testCases.push(
-        new ProblemTestCase({
-          id: testCase.id,
-          description: testCase.description,
-          maxPoints: testCase.maxPoints,
-        })
+    for (const testCase of yaml.testcases) {
+      if (config.inputType === ProblemInputType.CodeReview) {
+        testCases.push(
+          new CodeReviewComment({
+            id: testCase.id,
+            description: testCase.description,
+            maxPoints: testCase.maxPoints,
+            newFileName: testCase.newFileName,
+            newFileCommentLine: testCase.newFileCommentLine,
+          })
+        );
+
+      } else {
+        testCases.push(
+          new ProblemTestCase({
+            id: testCase.id,
+            description: testCase.description,
+            maxPoints: testCase.maxPoints,
+          })
       );
+
+      }
     }
 
     return Promise.resolve(testCases);
   }
 
   /**
-   * Some problems have pre-requisites, such as having a GitHub profile
+   * Some problems have prerequisites, such as having a GitHub profile
    * linked, or solving other problems, or anything. Most problems don't
-   * have a pre-req. But you can add that here.
+   * have prerequisites. But you can add that here.
    *
    * @param user The user opening the problem
-   * @returns Wether the prerequistes have been satisfied or not.
+   * @returns Whether the prerequisites have been satisfied or not.
    */
   async prerequesites(user: User): Promise<ProblemPrerequisitesResult> {
     //
@@ -76,7 +93,7 @@ export class Validator implements DevMatchValidator {
   }
 
   /**
-   * The statement is read from the Yaml in most cases and returned as is.
+   * The statement is read from the YAML in most cases and returned as is.
    *
    * @param userId The user opening the problem.
    * @returns A string with the problem statement.
@@ -141,8 +158,8 @@ export class Validator implements DevMatchValidator {
     databag: Map<string, string>,
     validationInput?: any
   ): Promise<EvaluatedTestCase[]> {
-    // This happens in the CLI, no need to fill out the tet cases here, but
-    // here is how you would do it if you wanted to.
+    // This happens in the CLI, no need to populate out the test cases output here, but
+    // here is how you would do it if you wanted to for some reason:
     // for (let testCase of testCases) {
     //     testCase.actualPoints = testCase.maxPoints
     //     testCase.hint = 'here is a hint from the problem for case ' + testCase.id
