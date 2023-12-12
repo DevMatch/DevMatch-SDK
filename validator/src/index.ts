@@ -111,7 +111,7 @@ program
     console.log(`  ______ _   _ _____  `)
     console.log(` |  ____| \\ | |  __ \\ `)
     console.log(` | |__  |  \\| | |  | |`)
-    console.log(` |  __| | . \\\` | |  | |`)
+    console.log(` |  __| | . \\ | |  | |`)
     console.log(` | |____| |\\  | |__| |`)
     console.log(` |______|_| \\_|_____/ `)
     console.log(`                      `)
@@ -173,7 +173,6 @@ program
 
     console.log(``);
 
-
     // NOW we need to merge the result files... and
     // just get the various test cases from as many
     // test files we have in buildTestResultFileNames
@@ -187,11 +186,12 @@ program
     // evaluated test cases.
 
     //
-    // Read Yaml test cases: Parse the yaml file
+    // Read problem test cases: these are originally taken from the Yaml file
     //
-    let evaluatedTestCases: EvaluatedTestCase[] = [];
-    for (const yamlTestCase of parsedYaml.testcases) {
+    const problemTestCases = await problemCode.getTestCases()
 
+    let evaluatedTestCases: EvaluatedTestCase[] = [];
+    for (const yamlTestCase of problemTestCases) {
       // Initialize Yaml test cases to failed state
       let evaluatedTestCase: EvaluatedTestCase =
         new Object() as EvaluatedTestCase;

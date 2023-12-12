@@ -3,6 +3,9 @@ version: 1.0
 #
 # Test cases for this problem. Describe how many points each test gets
 #
+# For code review problems, add these per test case:
+#  newFileName: hello.txt
+#  newFileCommentLine: 1
 testcases:
     - id: TEST_1
       description: Add two integers
@@ -27,7 +30,8 @@ statement: |
   ```
 
 #
-# Some configuration for this problem
+# Some configuration for this problem. Input type can be:
+#   GitRepo, CodeReview or Url
 #
 configuration:
     - inputType: GitRepo
