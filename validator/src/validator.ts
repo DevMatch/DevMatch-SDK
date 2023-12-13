@@ -48,17 +48,19 @@ export class Validator implements DevMatchValidator {
   async getTestCases(): Promise<ProblemTestCase[]> {
     const config = await this.getProblemConfiguration();
 
-    const yaml = CHALLENGE_YAML_STRING;
     let testCases: ProblemTestCase[] = [];
+
+    const yaml = CHALLENGE_YAML_STRING;
     for (const testCase of yaml.testcases) {
+
       if (config.inputType === ProblemInputType.CodeReview) {
         testCases.push(
           new CodeReviewComment({
             id: testCase.id,
             description: testCase.description,
             maxPoints: testCase.maxPoints,
-            newFileName: testCase.newFileName,
-            newFileCommentLine: testCase.newFileCommentLine,
+            newFileName : (testCase as CodeReviewComment).newFileName,
+            newFileCommentLine: (testCase as CodeReviewComment).newFileCommentLine,
           })
         );
 
