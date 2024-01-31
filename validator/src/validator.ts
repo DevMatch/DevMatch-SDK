@@ -167,6 +167,6 @@ export class Validator implements DevMatchValidator {
     //     testCase.hint = 'here is a hint from the problem for case ' + testCase.id
     //     testCase.solved = true
     // }
-    return Promise.resolve(testCases);
+    return Promise.resolve([]);
   }
 }
