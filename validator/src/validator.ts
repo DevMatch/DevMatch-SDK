@@ -111,9 +111,17 @@ export class Validator implements DevMatchValidator {
     const rawConfig = CHALLENGE_YAML_STRING.configuration;
 
     let config = new ProblemConfiguration();
-    config.ideEnabled =
-      rawConfig.find((config) => config.ideEnabled !== undefined)?.ideEnabled ||
-      false;
+
+    const getConfig = (configName, defaultValue) => {
+        const configObject = rawConfig.find(c => Object.hasOwn(c, configName));
+        return configObject ? (configObject[configName] || defaultValue) : defaultValue;
+    }
+
+    config.ideEnabled =     getConfig('ideEnabled', false);
+    config.vsliteEnabled =  getConfig('vsliteEnabled', false);
+    config.desktopEnabled = getConfig('desktopEnabled', false);
+    config.agentPool = getConfig('agentPool', 'default');
+    config.agentImage = getConfig('agentImage', 'default');
 
     // The Yaml contains strings, turn that into types:
     const rawInputType = rawConfig.find(

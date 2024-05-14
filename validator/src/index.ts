@@ -56,8 +56,12 @@ program
     );
     let problemConfiguration = await problemCode.getProblemConfiguration();
     console.table([
+      [ "inputType", problemConfiguration.inputType ],
+      [ "desktopEnabled", problemConfiguration.desktopEnabled ],
       [ "ideEnabled", problemConfiguration.ideEnabled ],
-      [ "inputType", problemConfiguration.inputType ]
+      [ "vsliteEnabled", problemConfiguration.vsliteEnabled ],
+      [ "agentPool", problemConfiguration.agentPool ],
+      [ "agentImage", problemConfiguration.agentImage ]
     ])
 
     const worskpaceFolder = path.join(process.cwd(), "..", "workspace");
@@ -79,9 +83,11 @@ program
         for (const validationStep of validationSteps)
         {
             const workingDirectory = path.join(worskpaceFolder, validationStep.workingDirectory ?? '');
-            console.log(`name            : ${validationStep.name}`);
-            console.log(`workingDirectory: ${workingDirectory}`);
-            console.log(`cmd             : ${validationStep.cmd}`);
+            console.log(`/=======================================================`);
+            console.log(`| name            : ${validationStep.name}`);
+            console.log(`| workingDirectory: ${workingDirectory}`);
+            console.log(`| cmd             : ${validationStep.cmd}`);
+            console.log(`\\=======================================================`);
 
             //
             // Run the command
@@ -101,6 +107,8 @@ program
                 const resultPath = path.join(workingDirectory, validationStep.results);
                 buildTestResultFileNames.push(resultPath)
             }
+
+            console.log(``);
 
         }
     } catch (e) {

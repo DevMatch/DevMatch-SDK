@@ -51,6 +51,8 @@ export class ProblemConfiguration {
   ideEnabled: boolean = false
   desktopEnabled = false;
   vsliteEnabled = false;
+  agentPool = '';
+  agentImage = '';
 }
 
 /**
