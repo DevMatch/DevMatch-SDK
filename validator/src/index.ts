@@ -79,10 +79,17 @@ program
     console.log(` |_____/   |_/_/    \\_\\_|  \\_\\ |_|   `)
     console.log(`                                     `)
     console.log(`                                     `)
+
+    process.env.WAIT_ON_TIMEOUT = '60000';
+
     try {
         for (const validationStep of validationSteps)
         {
-            const workingDirectory = path.join(worskpaceFolder, validationStep.workingDirectory ?? '');
+            // Start from the path to the workspace or if the Yaml specificies a working directory, then use that
+            // Whatever is specified, will be after the parent of the workspace directory.
+            const workingDirectory = validationStep.workingDirectory ?
+              path.normalize(path.join(process.cwd(), "..", validationStep.workingDirectory)) : worskpaceFolder;
+
             console.log(`/=======================================================`);
             console.log(`| name            : ${validationStep.name}`);
             console.log(`| workingDirectory: ${workingDirectory}`);
@@ -149,20 +156,20 @@ program
         // Read build test cases: Parse the JUnit test result file
         //
         console.log(`Found the output file: ${fileName}`);
-        const buildParsedJunitContents = await parseJunitXml(resultsContents);
+        let buildParsedJunitContents : any = null;
+        try {
+            buildParsedJunitContents = await parseJunitXml(resultsContents);
+        } catch (e) {
+          console.log(`Unable to parse output: ${fileName}`);
+          throw e;
+          return;
+        }
         if (!buildParsedJunitContents) {
           console.log(`Unable to parse output: ${fileName}`);
-          return;
+          throw Error();
         }
 
-        const buildTestSuites = (buildParsedJunitContents as TestSuites).testsuite;
-
-        // There must be at least one test suite and test case
-        // TODO: IS this really needed?
-        if (!(buildTestSuites && buildTestSuites[0] && buildTestSuites[0].testcase)) {
-          console.log("Unable to find testcases");
-          return;
-        }
+        const buildTestSuites = (buildParsedJunitContents as TestSuites).testsuite || [];
 
         // Flatten the tree and just extract all the test cases from the build
         let buildTestCases : any [] = [];
@@ -187,7 +194,11 @@ program
     let buildTestCases : any [] = [];
     for (const resultFile of buildTestResultFileNames) {
         console.log(`Result file : ${resultFile}`);
-        buildTestCases = buildTestCases.concat(await extractTestCasesFromJunit(resultFile));
+        try {
+            buildTestCases = buildTestCases.concat(await extractTestCasesFromJunit(resultFile));
+        } catch (e) {
+            console.log(`Unable to parse test case from ${resultFile}: ${e}.`);
+        }
     }
 
     // Read the test cases from the YAML file, and start the comparison with the
@@ -220,7 +231,8 @@ program
     //
     for (let yamlTestCase of evaluatedTestCases) {
       // Find this result on build test cases
-      const foundBuildTestCase = buildTestCases.find((c) => c.name.trim() === yamlTestCase.id);
+
+      const foundBuildTestCase = buildTestCases?.find((c) => c?.name?.trim() === yamlTestCase.id);
         if (foundBuildTestCase) {
           const failure = foundBuildTestCase.failure !== undefined;
           console.log(`Found mapping ${yamlTestCase.id}. Failure = ${failure}`);
