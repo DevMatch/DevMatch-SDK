@@ -11,7 +11,10 @@ export function execute(command, printOutput = false, cwd = "") {
     }
 
     const [cmd, ...args] = command.split(" ");
-    const child = spawn(cmd, args, { cwd: cwd });
+    const child = spawn(cmd, args, {
+      cwd: cwd,
+      shell: true,
+    });
 
     let stdout = "";
     let stderr = "";
