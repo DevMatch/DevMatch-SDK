@@ -90,21 +90,40 @@ program
             const workingDirectory = validationStep.workingDirectory ?
               path.normalize(path.join(process.cwd(), "..", validationStep.workingDirectory)) : worskpaceFolder;
 
-            console.log(`/=======================================================`);
-            console.log(`| name            : ${validationStep.name}`);
-            console.log(`| workingDirectory: ${workingDirectory}`);
-            console.log(`| cmd             : ${validationStep.cmd}`);
-            console.log(`\\=======================================================`);
+            if (validationStep?.task === "createFile") {
+              const fileFullName = path.join(workingDirectory, validationStep.file);
 
-            //
-            // Run the command
-            //
-            try {
+              console.log(`/=======================================================`);
+              console.log(`| task            : ${validationStep.task}`);
+              console.log(`| workingDirectory: ${workingDirectory}`);
+              console.log(`| file name       : ${fileFullName}`);
+              console.log(`\\=======================================================`);
 
-                await execute(validationStep.cmd, true, workingDirectory);
-            } catch (innerError) {
-                console.error("Command failed. But continuing still...");
+              // create a file to disk
+              fs.writeFileSync(fileFullName, validationStep.contents);
+              console.log(`Created file: ${fileFullName}`);
+
+            } else {
+              console.log(`/=======================================================`);
+              console.log(`| name            : ${validationStep.name}`);
+              console.log(`| workingDirectory: ${workingDirectory}`);
+              console.log(`| cmd             : ${validationStep.cmd}`);
+              console.log(`\\=======================================================`);
+
+              //
+              // Run the command
+              //
+              try {
+                //await execute(validationStep.cmd, true, workingDirectory);
+                await execute(validationStep.cmd, true);
+
+              } catch (innerError) {
+                  console.error("Command failed. But continuing still...");
+
+              }
+
             }
+
 
             //
             // Collect the result if instructed

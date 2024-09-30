@@ -1,0 +1,36 @@
+name: test-build
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+
+    steps:
+      # Checkout the repository
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # Set up Node.js in Linux and Windows environments
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18' # Specify the Node.js version you need
+
+      # Install npm dependencies
+      - name: Install dependencies
+        run: npm install
+
+      # Run the npm command (replace 'build' with your command)
+      - name: Run npm command
+        run: npm run build
