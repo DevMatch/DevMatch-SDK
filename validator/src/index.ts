@@ -113,8 +113,7 @@ program
           // Run the command
           //
           try {
-            //await execute(validationStep.cmd, true, workingDirectory);
-            await execute(validationStep.cmd, true);
+            await execute(validationStep.cmd, true, workingDirectory);
 
           } catch (innerError) {
             console.error("Command failed. But continuing still...");
