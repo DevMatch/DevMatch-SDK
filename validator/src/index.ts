@@ -56,19 +56,19 @@ program
     );
     let problemConfiguration = await problemCode.getProblemConfiguration();
     console.table([
-      [ "inputType", problemConfiguration.inputType ],
-      [ "desktopEnabled", problemConfiguration.desktopEnabled ],
-      [ "ideEnabled", problemConfiguration.ideEnabled ],
-      [ "vsliteEnabled", problemConfiguration.vsliteEnabled ],
-      [ "agentPool", problemConfiguration.agentPool ],
-      [ "agentImage", problemConfiguration.agentImage ]
+      ["inputType", problemConfiguration.inputType],
+      ["desktopEnabled", problemConfiguration.desktopEnabled],
+      ["ideEnabled", problemConfiguration.ideEnabled],
+      ["vsliteEnabled", problemConfiguration.vsliteEnabled],
+      ["agentPool", problemConfiguration.agentPool],
+      ["agentImage", problemConfiguration.agentImage]
     ])
 
     const worskpaceFolder = path.join(process.cwd(), "..", "workspace");
     console.log("Current working directory", worskpaceFolder)
 
     const validationSteps = parsedYaml.validate;
-    let buildTestResultFileNames : string[] = [];
+    let buildTestResultFileNames: string[] = [];
 
     console.log(`                                     `)
     console.log(`   _____ _______       _____ _______ `)
@@ -83,63 +83,61 @@ program
     process.env.WAIT_ON_TIMEOUT = '60000';
 
     try {
-        for (const validationStep of validationSteps)
-        {
-            // Start from the path to the workspace or if the Yaml specificies a working directory, then use that
-            // Whatever is specified, will be after the parent of the workspace directory.
-            const workingDirectory = validationStep.workingDirectory ?
-              path.normalize(path.join(process.cwd(), "..", validationStep.workingDirectory)) : worskpaceFolder;
+      for (const validationStep of validationSteps) {
+        // Start from the path to the workspace or if the Yaml specificies a working directory, then use that
+        // Whatever is specified, will be after the parent of the workspace directory.
+        const workingDirectory = validationStep.workingDirectory ?
+          path.normalize(path.join(process.cwd(), "..", validationStep.workingDirectory)) : worskpaceFolder;
 
-            if (validationStep?.task === "createFile") {
-              const fileFullName = path.join(workingDirectory, validationStep.file);
+        if (validationStep?.task === "createFile") {
+          const fileFullName = path.join(workingDirectory, validationStep.file);
 
-              console.log(`/=======================================================`);
-              console.log(`| task            : ${validationStep.task}`);
-              console.log(`| workingDirectory: ${workingDirectory}`);
-              console.log(`| file name       : ${fileFullName}`);
-              console.log(`\\=======================================================`);
+          console.log(`/=======================================================`);
+          console.log(`| task            : ${validationStep.task}`);
+          console.log(`| workingDirectory: ${workingDirectory}`);
+          console.log(`| file name       : ${fileFullName}`);
+          console.log(`\\=======================================================`);
 
-              // create a file to disk
-              fs.writeFileSync(fileFullName, validationStep.contents);
-              console.log(`Created file: ${fileFullName}`);
+          // create a file to disk
+          fs.writeFileSync(fileFullName, validationStep.contents);
+          console.log(`Created file: ${fileFullName}`);
 
-            } else {
-              console.log(`/=======================================================`);
-              console.log(`| name            : ${validationStep.name}`);
-              console.log(`| workingDirectory: ${workingDirectory}`);
-              console.log(`| cmd             : ${validationStep.cmd}`);
-              console.log(`\\=======================================================`);
+        } else {
+          console.log(`/=======================================================`);
+          console.log(`| name            : ${validationStep.name}`);
+          console.log(`| workingDirectory: ${workingDirectory}`);
+          console.log(`| cmd             : ${validationStep.cmd}`);
+          console.log(`\\=======================================================`);
 
-              //
-              // Run the command
-              //
-              try {
-                //await execute(validationStep.cmd, true, workingDirectory);
-                await execute(validationStep.cmd, true);
+          //
+          // Run the command
+          //
+          try {
+            //await execute(validationStep.cmd, true, workingDirectory);
+            await execute(validationStep.cmd, true);
 
-              } catch (innerError) {
-                  console.error("Command failed. But continuing still...");
+          } catch (innerError) {
+            console.error("Command failed. But continuing still...");
 
-              }
-
-            }
-
-
-            //
-            // Collect the result if instructed
-            //
-            if (validationStep.results !== undefined)
-            {
-                const resultPath = path.join(workingDirectory, validationStep.results);
-                buildTestResultFileNames.push(resultPath)
-            }
-
-            console.log(``);
+          }
 
         }
+
+
+        //
+        // Collect the result if instructed
+        //
+        if (validationStep.results !== undefined) {
+          const resultPath = path.join(workingDirectory, validationStep.results);
+          buildTestResultFileNames.push(resultPath)
+        }
+
+        console.log(``);
+
+      }
     } catch (e) {
-        console.error("Caught exception while executing.");
-        console.error(e)
+      console.error("Caught exception while executing.");
+      console.error(e)
     }
 
     console.log(`  ______ _   _ _____  `)
@@ -163,46 +161,46 @@ program
     //
 
     const extractTestCasesFromJunit = async (fileName) => {
-        const resultsContents = await getFileContents(fileName);
-        if (resultsContents === false) {
-          console.log(
-            `The test run did not produce an output at: ${fileName}`
-          );
-          return [];
-        }
+      const resultsContents = await getFileContents(fileName);
+      if (resultsContents === false) {
+        console.log(
+          `The test run did not produce an output at: ${fileName}`
+        );
+        return [];
+      }
 
-        //
-        // Read build test cases: Parse the JUnit test result file
-        //
-        console.log(`Found the output file: ${fileName}`);
-        let buildParsedJunitContents : any = null;
-        try {
-            buildParsedJunitContents = await parseJunitXml(resultsContents);
-        } catch (e) {
-          console.log(`Unable to parse output: ${fileName}`);
-          throw e;
-          return;
-        }
-        if (!buildParsedJunitContents) {
-          console.log(`Unable to parse output: ${fileName}`);
-          throw Error();
-        }
+      //
+      // Read build test cases: Parse the JUnit test result file
+      //
+      console.log(`Found the output file: ${fileName}`);
+      let buildParsedJunitContents: any = null;
+      try {
+        buildParsedJunitContents = await parseJunitXml(resultsContents);
+      } catch (e) {
+        console.log(`Unable to parse output: ${fileName}`);
+        throw e;
+        return;
+      }
+      if (!buildParsedJunitContents) {
+        console.log(`Unable to parse output: ${fileName}`);
+        throw Error();
+      }
 
-        const buildTestSuites = (buildParsedJunitContents as TestSuites).testsuite || [];
+      const buildTestSuites = (buildParsedJunitContents as TestSuites).testsuite || [];
 
-        // Flatten the tree and just extract all the test cases from the build
-        let buildTestCases : any [] = [];
-        for (const suites of buildTestSuites) {
-            if (suites?.testcase === undefined) {
-                continue;
-            }
-            for (const testCase of suites?.testcase) {
-                buildTestCases.push(testCase);
-                console.log(`Found test case from the build : '${testCase.name}'`)
-            }
+      // Flatten the tree and just extract all the test cases from the build
+      let buildTestCases: any[] = [];
+      for (const suites of buildTestSuites) {
+        if (suites?.testcase === undefined) {
+          continue;
         }
+        for (const testCase of suites?.testcase) {
+          buildTestCases.push(testCase);
+          console.log(`Found test case from the build : '${testCase.name}'`)
+        }
+      }
 
-        return buildTestCases;
+      return buildTestCases;
     }
 
     console.log(``);
@@ -210,14 +208,14 @@ program
     // NOW we need to merge the result files... and
     // just get the various test cases from as many
     // test files we have in buildTestResultFileNames
-    let buildTestCases : any [] = [];
+    let buildTestCases: any[] = [];
     for (const resultFile of buildTestResultFileNames) {
-        console.log(`Result file : ${resultFile}`);
-        try {
-            buildTestCases = buildTestCases.concat(await extractTestCasesFromJunit(resultFile));
-        } catch (e) {
-            console.log(`Unable to parse test case from ${resultFile}: ${e}.`);
-        }
+      console.log(`Result file : ${resultFile}`);
+      try {
+        buildTestCases = buildTestCases.concat(await extractTestCasesFromJunit(resultFile));
+      } catch (e) {
+        console.log(`Unable to parse test case from ${resultFile}: ${e}.`);
+      }
     }
 
     // Read the test cases from the YAML file, and start the comparison with the
@@ -252,18 +250,18 @@ program
       // Find this result on build test cases
 
       const foundBuildTestCase = buildTestCases?.find((c) => c?.name?.trim() === yamlTestCase.id);
-        if (foundBuildTestCase) {
-          const failure = foundBuildTestCase.failure !== undefined;
-          console.log(`Found mapping ${yamlTestCase.id}. Failure = ${failure}`);
+      if (foundBuildTestCase) {
+        const failure = foundBuildTestCase.failure !== undefined;
+        console.log(`Found mapping ${yamlTestCase.id}. Failure = ${failure}`);
 
-          if (!failure) {
-              yamlTestCase.actualPoints = yamlTestCase.maxPoints;
-              yamlTestCase.solved = true;
-          }
-
-        } else {
-            console.log(`Test case mapping ${yamlTestCase.id} *NOT* found. Build did not produce this test case.`);
+        if (!failure) {
+          yamlTestCase.actualPoints = yamlTestCase.maxPoints;
+          yamlTestCase.solved = true;
         }
+
+      } else {
+        console.log(`Test case mapping ${yamlTestCase.id} *NOT* found. Build did not produce this test case.`);
+      }
     }
 
     //
