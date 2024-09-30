@@ -25,12 +25,12 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '18' # Specify the Node.js version you need
+          node-version: '18'
 
-      # Install npm dependencies
       - name: Install dependencies
         run: npm install
-
-      # Run the npm command (replace 'build' with your command)
-      - name: Run npm command
-        run: npm run build
+        working-directory: ./validator
+        
+      - name: Validate the DevMatch
+        run: npm run devmatch -- validate
+        working-directory: ./validator
